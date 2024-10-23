@@ -33,9 +33,9 @@ class _BooksAppState extends State<BooksApp> {
 
 class BookRouteInformationParser extends RouteInformationParser<BookRoutePath> {
   @override
-  Future<BookRoutePath> parseRouteInformation(
-      RouteInformation routeInformation) async {
-    final uri = Uri.parse(routeInformation.location);
+  Future<BookRoutePath> parseRouteInformation(RouteInformation routeInformation) async {
+    print('parseRouteInformation RouteInformation ${routeInformation.uri}');
+    final uri = routeInformation.uri;
     // Handle '/'
     if (uri.pathSegments.length == 0) {
       return BookRoutePath.home();
@@ -56,21 +56,21 @@ class BookRouteInformationParser extends RouteInformationParser<BookRoutePath> {
 
   @override
   RouteInformation? restoreRouteInformation(BookRoutePath path) {
+    print('restoreRouteInformation ${path.toString()}');
     if (path.isUnknown) {
-      return RouteInformation(location: '/404');
+      return RouteInformation(uri: Uri.parse('/404'));
     }
     if (path.isHomePage) {
-      return RouteInformation(location: '/');
+      return RouteInformation(uri: Uri.parse('/'));
     }
     if (path.isDetailsPage) {
-      return RouteInformation(location: '/book/${path.id}');
+      return RouteInformation(uri: Uri.parse('/book/${path.id}'));
     }
     return null;
   }
 }
 
-class BookRouterDelegate extends RouterDelegate<BookRoutePath>
-    with ChangeNotifier, PopNavigatorRouterDelegateMixin<BookRoutePath> {
+class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifier, PopNavigatorRouterDelegateMixin<BookRoutePath> {
   final GlobalKey<NavigatorState> navigatorKey;
 
   Book? _selectedBook;
@@ -85,6 +85,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath>
   BookRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>();
 
   BookRoutePath get currentConfiguration {
+    print("currentConfiguration");
     if (show404) {
       return BookRoutePath.unknown();
     }
@@ -95,6 +96,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath>
 
   @override
   Widget build(BuildContext context) {
+    print("build");
     return Navigator(
       key: navigatorKey,
       pages: [
@@ -126,7 +128,20 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath>
   }
 
   @override
+  Future<void> setInitialRoutePath(BookRoutePath configuration) {
+    print("setInitialRoutePath ${configuration.toString()}");
+    return super.setInitialRoutePath(configuration);
+  }
+
+  @override
+  Future<void> setRestoredRoutePath(BookRoutePath configuration) {
+    print("setInitialRoutePath ${configuration.toString()}");
+    return super.setRestoredRoutePath(configuration);
+  }
+
+  @override
   Future<void> setNewRoutePath(BookRoutePath path) async {
+    print("setInitialRoutePath ${path.toString()}");
     if (path.isUnknown) {
       _selectedBook = null;
       show404 = true;
@@ -187,6 +202,11 @@ class BookRoutePath {
   bool get isHomePage => id == null;
 
   bool get isDetailsPage => id != null;
+
+  @override
+  String toString() {
+    return "BookRoutePath: id=${id} isUnknown=${isUnknown}";
+  }
 }
 
 class BooksListScreen extends StatelessWidget {
