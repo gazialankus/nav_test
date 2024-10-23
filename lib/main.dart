@@ -14,16 +14,24 @@ class BooksApp extends StatefulWidget {
 }
 
 class _BooksAppState extends State<BooksApp> {
-  BookRouterDelegate _routerDelegate = BookRouterDelegate();
-  BookRouteInformationParser _routeInformationParser =
-  BookRouteInformationParser();
+  final BookRouterDelegate _routerDelegate = BookRouterDelegate();
+  final BookRouteInformationParser _routeInformationParser = BookRouteInformationParser();
+  final RouteInformationProvider _routeInformationProvider = PlatformRouteInformationProvider(
+      initialRouteInformation: RouteInformation(
+        uri: WidgetsBinding.instance.platformDispatcher.defaultRouteName != '/'
+            ? Uri.parse(WidgetsBinding.instance.platformDispatcher.defaultRouteName)
+            : Uri.parse('/book/1')
+      )
+  );
 
   @override
   Widget build(BuildContext context) {
+
     return MaterialApp.router(
       title: 'Books App',
       routerDelegate: _routerDelegate,
       routeInformationParser: _routeInformationParser,
+      routeInformationProvider: _routeInformationProvider,
     );
   }
 }
