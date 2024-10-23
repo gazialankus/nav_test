@@ -1,125 +1,256 @@
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(BooksApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class Book {
+  final String title;
+  final String author;
 
-  // This widget is the root of your application.
+  Book(this.title, this.author);
+}
+
+class BooksApp extends StatefulWidget {
+  @override
+  State<StatefulWidget> createState() => _BooksAppState();
+}
+
+class _BooksAppState extends State<BooksApp> {
+  BookRouterDelegate _routerDelegate = BookRouterDelegate();
+  BookRouteInformationParser _routeInformationParser =
+  BookRouteInformationParser();
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    return MaterialApp.router(
+      title: 'Books App',
+      routerDelegate: _routerDelegate,
+      routeInformationParser: _routeInformationParser,
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+class BookRouteInformationParser extends RouteInformationParser<BookRoutePath> {
+  @override
+  Future<BookRoutePath> parseRouteInformation(
+      RouteInformation routeInformation) async {
+    final uri = Uri.parse(routeInformation.location);
+    // Handle '/'
+    if (uri.pathSegments.length == 0) {
+      return BookRoutePath.home();
+    }
 
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
+    // Handle '/book/:id'
+    if (uri.pathSegments.length == 2) {
+      if (uri.pathSegments[0] != 'book') return BookRoutePath.unknown();
+      var remaining = uri.pathSegments[1];
+      var id = int.tryParse(remaining);
+      if (id == null) return BookRoutePath.unknown();
+      return BookRoutePath.details(id);
+    }
 
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+    // Handle unknown routes
+    return BookRoutePath.unknown();
+  }
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  RouteInformation? restoreRouteInformation(BookRoutePath path) {
+    if (path.isUnknown) {
+      return RouteInformation(location: '/404');
+    }
+    if (path.isHomePage) {
+      return RouteInformation(location: '/');
+    }
+    if (path.isDetailsPage) {
+      return RouteInformation(location: '/book/${path.id}');
+    }
+    return null;
+  }
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class BookRouterDelegate extends RouterDelegate<BookRoutePath>
+    with ChangeNotifier, PopNavigatorRouterDelegateMixin<BookRoutePath> {
+  final GlobalKey<NavigatorState> navigatorKey;
 
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
+  Book? _selectedBook;
+  bool show404 = false;
+
+  List<Book> books = [
+    Book('Left Hand of Darkness', 'Ursula K. Le Guin'),
+    Book('Too Like the Lightning', 'Ada Palmer'),
+    Book('Kindred', 'Octavia E. Butler'),
+  ];
+
+  BookRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>();
+
+  BookRoutePath get currentConfiguration {
+    if (show404) {
+      return BookRoutePath.unknown();
+    }
+    return _selectedBook == null
+        ? BookRoutePath.home()
+        : BookRoutePath.details(books.indexOf(_selectedBook!));
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    return Navigator(
+      key: navigatorKey,
+      pages: [
+        MaterialPage(
+          key: ValueKey('BooksListPage'),
+          child: BooksListScreen(
+            books: books,
+            onTapped: _handleBookTapped,
+          ),
+        ),
+        if (show404)
+          MaterialPage(key: ValueKey('UnknownPage'), child: UnknownScreen())
+        else if (_selectedBook != null)
+          BookDetailsPage(book: _selectedBook!)
+      ],
+      onPopPage: (route, result) {
+        if (!route.didPop(result)) {
+          return false;
+        }
+
+        // Update the list of pages by setting _selectedBook to null
+        _selectedBook = null;
+        show404 = false;
+        notifyListeners();
+
+        return true;
+      },
+    );
+  }
+
+  @override
+  Future<void> setNewRoutePath(BookRoutePath path) async {
+    if (path.isUnknown) {
+      _selectedBook = null;
+      show404 = true;
+      return;
+    }
+
+    if (path.isDetailsPage) {
+      if (path.id! < 0 || path.id! > books.length - 1) {
+        show404 = true;
+        return;
+      }
+
+      _selectedBook = books[path.id!];
+    } else {
+      _selectedBook = null;
+    }
+
+    show404 = false;
+  }
+
+  void _handleBookTapped(Book book) {
+    _selectedBook = book;
+    notifyListeners();
+  }
+}
+
+class BookDetailsPage extends Page {
+  final Book? book;
+
+  BookDetailsPage({
+    this.book,
+  }) : super(key: ValueKey(book));
+
+  Route createRoute(BuildContext context) {
+    return MaterialPageRoute(
+      settings: this,
+      builder: (BuildContext context) {
+        return BookDetailsScreen(book: book);
+      },
+    );
+  }
+}
+
+class BookRoutePath {
+  final int? id;
+  final bool isUnknown;
+
+  BookRoutePath.home()
+      : id = null,
+        isUnknown = false;
+
+  BookRoutePath.details(this.id) : isUnknown = false;
+
+  BookRoutePath.unknown()
+      : id = null,
+        isUnknown = true;
+
+  bool get isHomePage => id == null;
+
+  bool get isDetailsPage => id != null;
+}
+
+class BooksListScreen extends StatelessWidget {
+  final List<Book> books;
+  final ValueChanged<Book> onTapped;
+
+  BooksListScreen({
+    required this.books,
+    required this.onTapped,
+  });
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+      appBar: AppBar(),
+      body: ListView(
+        children: [
+          for (var book in books)
+            ListTile(
+              title: Text(book.title),
+              subtitle: Text(book.author),
+              onTap: () => onTapped(book),
+            )
+        ],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
+    );
+  }
+}
+
+class BookDetailsScreen extends StatelessWidget {
+  final Book? book;
+
+  BookDetailsScreen({
+    @required this.book,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (book != null) ...[
+              Text(book!.title, style: Theme.of(context).textTheme.headlineMedium),
+              Text(book!.author, style: Theme.of(context).textTheme.headlineMedium),
+            ],
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class UnknownScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(),
+      body: Center(
+        child: Text('404!'),
+      ),
     );
   }
 }
