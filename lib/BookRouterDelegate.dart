@@ -6,6 +6,8 @@ import 'BookRoutePath.dart';
 import 'BooksListScreen.dart';
 import 'UnknownScreen.dart';
 
+// we are a router and our current whereabouts in the app is determined by a BookRoutePath instance
+// every item in history as well as stack is a BookRoutePath
 class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifier, PopNavigatorRouterDelegateMixin<BookRoutePath> {
   final GlobalKey<NavigatorState> navigatorKey;
 
@@ -18,6 +20,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
     Book('Kindred', 'Octavia E. Butler'),
   ];
 
+  // delegate is created once in the app state, so there is only one of this
   BookRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>();
 
   BookRoutePath get currentConfiguration {
@@ -32,22 +35,23 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
 
   @override
   Widget build(BuildContext context) {
-    print("build");
+    print("builddd");
+    final pages = [
+      MaterialPage(
+        key: ValueKey('BooksListPage'),
+        child: BooksListScreen(
+          books: books,
+          onTapped: _handleBookTapped,
+        ),
+      ),
+      if (show404)
+        MaterialPage(key: ValueKey('UnknownPage'), child: UnknownScreen())
+      else if (_selectedBook != null)
+        BookDetailsPage(book: _selectedBook!)
+    ];
     return Navigator(
       key: navigatorKey,
-      pages: [
-        MaterialPage(
-          key: ValueKey('BooksListPage'),
-          child: BooksListScreen(
-            books: books,
-            onTapped: _handleBookTapped,
-          ),
-        ),
-        if (show404)
-          MaterialPage(key: ValueKey('UnknownPage'), child: UnknownScreen())
-        else if (_selectedBook != null)
-          BookDetailsPage(book: _selectedBook!)
-      ],
+      pages: pages,
       onPopPage: (route, result) {
         if (!route.didPop(result)) {
           return false;
@@ -63,6 +67,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
     );
   }
 
+  // can override setInitialRoutePath and setRestoredRoutePath but no need
   @override
   Future<void> setInitialRoutePath(BookRoutePath configuration) {
     print("setInitialRoutePath ${configuration.toString()}");
