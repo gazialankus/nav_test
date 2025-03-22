@@ -10,6 +10,7 @@ class BookDetailsPage extends Page {
     this.book,
   }) : super(key: ValueKey(book));
 
+  @override
   Route createRoute(BuildContext context) {
     return MaterialPageRoute(
       settings: this,
