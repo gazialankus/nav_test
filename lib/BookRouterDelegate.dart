@@ -24,18 +24,20 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
   BookRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>();
 
   BookRoutePath get currentConfiguration {
-    print("currentConfiguration");
+    print("BookRouterDelegate.currentConfiguration");
     if (show404) {
       return BookRoutePath.unknown();
     }
-    return _selectedBook == null
+    final selectedBook = _selectedBook;
+    print("  _selectedBook is ${selectedBook == null ? "null" : books.indexOf(selectedBook)}");
+    return selectedBook == null
         ? BookRoutePath.home()
-        : BookRoutePath.details(books.indexOf(_selectedBook!));
+        : BookRoutePath.details(books.indexOf(selectedBook));
   }
 
   @override
   Widget build(BuildContext context) {
-    print("builddd");
+    print("BookRouterDelegate.build with ${_selectedBook}");
     final pages = [
       MaterialPage(
         key: ValueKey('BooksListPage'),
@@ -49,11 +51,14 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
       else if (_selectedBook != null)
         BookDetailsPage(book: _selectedBook!)
     ];
+    print("  num pages: ${pages.length}");
     return Navigator(
       key: navigatorKey,
       pages: pages,
       onPopPage: (route, result) {
+        print('Navigator.onPopPage imperative pop handled $route $result');
         if (!route.didPop(result)) {
+          print('  route did not didPop');
           return false;
         }
 
@@ -70,19 +75,19 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
   // can override setInitialRoutePath and setRestoredRoutePath but no need
   @override
   Future<void> setInitialRoutePath(BookRoutePath configuration) {
-    print("setInitialRoutePath ${configuration.toString()}");
+    print("BookRouterDelegate.setInitialRoutePath ${configuration.toString()}");
     return super.setInitialRoutePath(configuration);
   }
 
   @override
   Future<void> setRestoredRoutePath(BookRoutePath configuration) {
-    print("setRestoredRoutePath ${configuration.toString()}");
+    print("BookRouterDelegate.setRestoredRoutePath ${configuration.toString()}");
     return super.setRestoredRoutePath(configuration);
   }
 
   @override
   Future<void> setNewRoutePath(BookRoutePath path) async {
-    print("setNewRoutePath ${path.toString()}");
+    print("BookRouterDelegate.setNewRoutePath ${path.toString()}");
     if (path.isUnknown) {
       _selectedBook = null;
       show404 = true;
@@ -104,6 +109,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
   }
 
   void _handleBookTapped(Book book) {
+    print('BookRouterDelegate._handleBookTapped ${book.title}');
     _selectedBook = book;
     notifyListeners();
   }
