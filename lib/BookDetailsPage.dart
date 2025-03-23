@@ -15,6 +15,8 @@ class BookDetailsPage extends Page {
     return MaterialPageRoute(
       settings: this,
       builder: (BuildContext context) {
+        // TODO why not have the widgets in here?
+        // this way I can differentiate between actual pages and mere widgets!
         return BookDetailsScreen(book: book);
       },
     );
