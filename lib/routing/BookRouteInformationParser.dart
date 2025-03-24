@@ -5,6 +5,7 @@ import 'BookRoutePath.dart';
 class BookRouteInformationParser extends RouteInformationParser<BookRoutePath> {
   @override
   Future<BookRoutePath> parseRouteInformation(RouteInformation routeInformation) async {
+    // TODO URL to path
     print('BookRouteInformationParser.parseRouteInformation RouteInformation ${routeInformation.uri}');
     print('  URI TO CONFIGURATION');
     final uri = routeInformation.uri;
@@ -28,6 +29,7 @@ class BookRouteInformationParser extends RouteInformationParser<BookRoutePath> {
 
   @override
   RouteInformation? restoreRouteInformation(BookRoutePath path) {
+    // TODO path to URL
     print('BookRouteInformationParser.restoreRouteInformation ${path.toString()}');
     print('  CONFIGURATION TO URI');
     if (path.isUnknown) {
