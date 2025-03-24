@@ -26,6 +26,19 @@ class BooksListPage extends Page {
                   subtitle: Text(book.author),
                   onTap: () => onTapped(book),
                 ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (context) {
+                    return Scaffold(
+                      appBar: AppBar(),
+                      body: Center(
+                        child: Text('This is a new page!'),
+                      ),
+                    );
+                  },));
+                },
+                child: Text('New page'),
+              ),
             ],
           ),
         );
