@@ -96,6 +96,22 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
         return;
       }
 
+      _selectedBook = null;
+
+      // can go through other pages bit by bit.
+      // do not need notifyListeners() if no intermediary pages, like this
+      // await Future.delayed(Duration(seconds: 3));
+
+      // need notifyListeners() if intermediary pages, like this
+      // _selectedBook = books[0];
+      // notifyListeners();
+      // await Future.delayed(Duration(seconds: 1));
+      // _selectedBook = books[1];
+      // notifyListeners();
+      // await Future.delayed(Duration(seconds: 1));
+      // _selectedBook = books[2];
+      // notifyListeners();
+      // await Future.delayed(Duration(seconds: 1));
       _selectedBook = books[path.id!];
     } else {
       _selectedBook = null;
