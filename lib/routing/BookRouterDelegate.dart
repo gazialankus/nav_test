@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 
-import 'Book.dart';
-import 'BookDetailsPage.dart';
+import '../data/Book.dart';
+import '../pages/BookDetailsPage.dart';
+import '../pages/BooksListPage.dart';
 import 'BookRoutePath.dart';
-import 'BooksListScreen.dart';
-import 'UnknownScreen.dart';
+import '../pages/UnknownPage.dart';
 
 // we are a router and our current whereabouts in the app is determined by a BookRoutePath instance
 // every item in history as well as stack is a BookRoutePath
@@ -39,15 +39,9 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
   Widget build(BuildContext context) {
     print("BookRouterDelegate.build with ${_selectedBook}");
     final pages = [
-      MaterialPage(
-        key: ValueKey('BooksListPage'),
-        child: BooksListScreen(
-          books: books,
-          onTapped: _handleBookTapped,
-        ),
-      ),
+      BooksListPage(books: books, onTapped: _handleBookTapped,),
       if (show404)
-        MaterialPage(key: ValueKey('UnknownPage'), child: UnknownScreen())
+        UnknownPage()
       else if (_selectedBook != null)
         BookDetailsPage(book: _selectedBook!)
     ];

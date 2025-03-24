@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:nav_test/routing/BookRouterDelegate.dart';
 
-import 'BookRouteInformationParser.dart';
-import 'BookRouterDelegate.dart';
+import 'routing/BookRouteInformationParser.dart';
 
 void main() {
   runApp(BooksApp());
