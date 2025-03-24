@@ -49,19 +49,15 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
     return Navigator(
       key: navigatorKey,
       pages: pages,
-      onPopPage: (route, result) {
-        print('Navigator.onPopPage imperative pop handled $route $result');
-        if (!route.didPop(result)) {
-          print('  route did not didPop');
-          return false;
+      onDidRemovePage: (page) {
+        print('Navigator.onDidRemovePage already popped ${page.name}, update yourself!');
+        if (page is BookDetailsPage) {
+          _selectedBook = null;
         }
-
-        // Update the list of pages by setting _selectedBook to null
-        _selectedBook = null;
-        show404 = false;
-        notifyListeners();
-
-        return true;
+        if (page is UnknownPage) {
+          show404 = false;
+        }
+        // not doing notifyListeners() unlike before, does not seem necessary.
       },
     );
   }
