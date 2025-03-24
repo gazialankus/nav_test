@@ -51,6 +51,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
       pages: pages,
       onDidRemovePage: (page) {
         print('Navigator.onDidRemovePage already popped ${page.name}, update yourself!');
+        print('  CONSUME POPPING OF PAGE TO UPDATE STATE');
         if (page is BookDetailsPage) {
           _selectedBook = null;
         }
@@ -78,6 +79,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
   @override
   Future<void> setNewRoutePath(BookRoutePath path) async {
     print("BookRouterDelegate.setNewRoutePath ${path.toString()}");
+    print('  CONSUME PATH TO UPDATE STATE');
     if (path.isUnknown) {
       _selectedBook = null;
       show404 = true;
