@@ -24,6 +24,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
   BookRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>();
 
   BookRoutePath get currentConfiguration {
+    // TODO convert state to path
     print("BookRouterDelegate.currentConfiguration");
     if (show404) {
       return BookRoutePath.unknown();
@@ -38,6 +39,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
   @override
   Widget build(BuildContext context) {
     print("BookRouterDelegate.build with ${_selectedBook}");
+    // TODO convert state to pages
     final pages = [
       BooksListPage(books: books, onTapped: _handleBookTapped,),
       if (show404)
@@ -50,6 +52,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
       key: navigatorKey,
       pages: pages,
       onDidRemovePage: (page) {
+        // TODO change state according to removed page
         print('Navigator.onDidRemovePage already popped ${page.name}, update yourself!');
         print('  CONSUME POPPING OF PAGE TO UPDATE STATE');
         if (page is BookDetailsPage) {
@@ -78,6 +81,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
 
   @override
   Future<void> setNewRoutePath(BookRoutePath path) async {
+    // TODO convert path to state
     print("BookRouterDelegate.setNewRoutePath ${path.toString()}");
     print('  CONSUME PATH TO UPDATE STATE');
     if (path.isUnknown) {
