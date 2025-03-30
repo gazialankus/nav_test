@@ -9,6 +9,7 @@ import '../pages/UnknownPage.dart';
 // we are a router and our current whereabouts in the app is determined by a BookRoutePath instance
 // every item in history as well as stack is a BookRoutePath
 class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifier, PopNavigatorRouterDelegateMixin<BookRoutePath> {
+  @override
   final GlobalKey<NavigatorState> navigatorKey;
 
   Book? _selectedBook;
