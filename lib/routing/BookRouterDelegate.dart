@@ -1,4 +1,5 @@
  import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/src/consumer.dart';
 
 import '../data/Book.dart';
 import '../pages/BookDetailsPage.dart';
@@ -12,6 +13,8 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
   @override
   final GlobalKey<NavigatorState> navigatorKey;
 
+  final WidgetRef ref;
+
   Book? _selectedBook;
   bool show404 = false;
 
@@ -22,7 +25,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
   ];
 
   // delegate is created once in the app state, so there is only one of this
-  BookRouterDelegate() : navigatorKey = GlobalKey<NavigatorState>();
+  BookRouterDelegate(this.ref) : navigatorKey = GlobalKey<NavigatorState>();
 
   BookRoutePath get currentConfiguration {
     // TODO convert state to path

@@ -1,20 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:nav_test/routing/BookRouterDelegate.dart';
 
 import 'routing/BookRouteInformationParser.dart';
 
 void main() {
-  runApp(BooksApp());
+  runApp(ProviderScope(child: BooksApp()));
 }
 
 
-class BooksApp extends StatefulWidget {
+class BooksApp extends ConsumerStatefulWidget {
   @override
-  State<StatefulWidget> createState() => _BooksAppState();
+  ConsumerState<BooksApp> createState() => _BooksAppState();
 }
 
-class _BooksAppState extends State<BooksApp> {
-  final BookRouterDelegate _routerDelegate = BookRouterDelegate();
+class _BooksAppState extends ConsumerState<BooksApp> {
+  late final BookRouterDelegate _routerDelegate;
   final BookRouteInformationParser _routeInformationParser = BookRouteInformationParser();
   final RouteInformationProvider _routeInformationProvider = PlatformRouteInformationProvider(
       initialRouteInformation: RouteInformation(
@@ -25,8 +26,13 @@ class _BooksAppState extends State<BooksApp> {
   );
 
   @override
-  Widget build(BuildContext context) {
+  void initState() {
+    super.initState();
+    _routerDelegate = BookRouterDelegate(ref);
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return MaterialApp.router(
       title: 'Books App',
       routerDelegate: _routerDelegate,
