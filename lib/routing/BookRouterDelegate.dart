@@ -1,4 +1,5 @@
  import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/src/consumer.dart';
 
 import '../data/Book.dart';
@@ -6,6 +7,8 @@ import '../pages/BookDetailsPage.dart';
 import '../pages/BooksListPage.dart';
 import 'BookRoutePath.dart';
 import '../pages/UnknownPage.dart';
+
+final bookChoiceProvider = StateProvider<int?>((ref) => null);
 
 // we are a router and our current whereabouts in the app is determined by a BookRoutePath instance
 // every item in history as well as stack is a BookRoutePath
@@ -28,9 +31,29 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
   BookRouterDelegate(this.ref) : navigatorKey = GlobalKey<NavigatorState>() {
     // input to delegate
     // ref.listenManual(some provider, listener);// listen to app state this way and bring that state in to this class.
+    ref.listenManual(bookChoiceProvider, (previous, next) {
+      print('Book change came from Riverpod: $next');
+      final Book? newSelectedBook;
+      if (next == null) {
+        newSelectedBook = null;
+      } else {
+        newSelectedBook = books[next];
+      }
+      if (newSelectedBook != _selectedBook) {
+        _selectedBook = newSelectedBook;
+        notifyListeners();
+      }
+    });
     // output from delegate
-    // ref.read(some provider.notifier).setSomething();
+    // ref.read(bookChoiceProvider.notifier).state = books.indexOf(_selectedBook!);
   }
+
+  void _reflectChoiceToProvider() {
+    final selectedBook = _selectedBook;
+    final selectedBookIndex = selectedBook == null ? null : books.indexOf(selectedBook);
+    ref.read(bookChoiceProvider.notifier).state = selectedBookIndex;
+  }
+
 
   BookRoutePath get currentConfiguration {
     // TODO convert state to path
@@ -57,6 +80,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
         BookDetailsPage(book: _selectedBook!)
     ];
     print("  num pages: ${pages.length}");
+    // Can't just use a Consumer here to rebuild the pages, it has to come from Router. 
     return Navigator(
       key: navigatorKey,
       pages: pages,
@@ -70,6 +94,8 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
         if (page is UnknownPage) {
           show404 = false;
         }
+        // you cannot go back to the same book after backing out of it, unless you have this here.
+        _reflectChoiceToProvider();
         // not doing notifyListeners() unlike before, does not seem necessary.
       },
     );
@@ -127,11 +153,19 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
     }
 
     show404 = false;
+
+    _reflectChoiceToProvider();
   }
 
   void _handleBookTapped(Book book) {
-    print('BookRouterDelegate._handleBookTapped ${book.title}');
-    _selectedBook = book;
-    notifyListeners();
+    // this is what we would do without Riverpod
+    // print('BookRouterDelegate._handleBookTapped ${book.title}');
+    // _selectedBook = book;
+    // notifyListeners();
+
+    // this below is with Riverpod and it works. The change comes to the RouterDelegate from Riverpod
+    // listenManual in contstructor.
+    final index = books.indexOf(book);
+    ref.read(bookChoiceProvider.notifier).state = index == -1 ? null : index;
   }
 }

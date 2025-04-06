@@ -57,7 +57,7 @@ class BookDetailsPage extends Page {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (book != null) ...[
-                  Text(
+                  Text( 
                     book!.title,
                     style: Theme.of(context).textTheme.headlineMedium,
                   ),
