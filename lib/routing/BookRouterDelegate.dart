@@ -25,7 +25,12 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
   ];
 
   // delegate is created once in the app state, so there is only one of this
-  BookRouterDelegate(this.ref) : navigatorKey = GlobalKey<NavigatorState>();
+  BookRouterDelegate(this.ref) : navigatorKey = GlobalKey<NavigatorState>() {
+    // input to delegate
+    // ref.listenManual(some provider, listener);// listen to app state this way and bring that state in to this class.
+    // output from delegate
+    // ref.read(some provider.notifier).setSomething();
+  }
 
   BookRoutePath get currentConfiguration {
     // TODO convert state to path
