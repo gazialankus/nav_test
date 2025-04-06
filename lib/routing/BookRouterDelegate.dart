@@ -73,7 +73,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
     print("BookRouterDelegate.build with ${_selectedBook}");
     // TODO convert state to pages
     final pages = [
-      BooksListPage(books: books, onTapped: _handleBookTapped,),
+      BooksListPage(books: books),
       if (show404)
         UnknownPage()
       else if (_selectedBook != null)
@@ -157,15 +157,16 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
     _reflectChoiceToProvider();
   }
 
-  void _handleBookTapped(Book book) {
-    // this is what we would do without Riverpod
-    // print('BookRouterDelegate._handleBookTapped ${book.title}');
-    // _selectedBook = book;
-    // notifyListeners();
+  // moved out to BookListPage, where it belongs. Left as a comment here to compare with the old.
+  // void _handleBookTapped(Book book) {
+  //   // this is what we would do without Riverpod
+  //   // print('BookRouterDelegate._handleBookTapped ${book.title}');
+  //   // _selectedBook = book;
+  //   // notifyListeners();
 
-    // this below is with Riverpod and it works. The change comes to the RouterDelegate from Riverpod
-    // listenManual in contstructor.
-    final index = books.indexOf(book);
-    ref.read(bookChoiceProvider.notifier).state = index == -1 ? null : index;
-  }
+  //   // this below is with Riverpod and it works. The change comes to the RouterDelegate from Riverpod
+  //   // listenManual in contstructor.
+  //   final index = books.indexOf(book);
+  //   ref.read(bookChoiceProvider.notifier).state = index == -1 ? null : index;
+  // }
 }
