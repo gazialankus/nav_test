@@ -10,7 +10,7 @@ class BookRouteInformationParser extends RouteInformationParser<BookRoutePath> {
     print('  URI TO CONFIGURATION');
     final uri = routeInformation.uri;
     // Handle '/'
-    if (uri.pathSegments.length == 0) {
+    if (uri.pathSegments.isEmpty) {
       return BookRoutePath.home();
     }
 

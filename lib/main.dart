@@ -9,6 +9,8 @@ void main() {
 }
 
 class BooksApp extends ConsumerStatefulWidget {
+  const BooksApp({super.key});
+
   @override
   ConsumerState<BooksApp> createState() => _BooksAppState();
 }

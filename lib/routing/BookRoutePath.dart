@@ -18,6 +18,6 @@ class BookRoutePath {
 
   @override
   String toString() {
-    return "BookRoutePath: id=${id} isUnknown=${isUnknown}";
+    return "BookRoutePath: id=$id isUnknown=$isUnknown";
   }
 }

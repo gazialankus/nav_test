@@ -55,6 +55,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
   }
 
 
+  @override
   BookRoutePath get currentConfiguration {
     // TODO convert state to path
     print("BookRouterDelegate.currentConfiguration");
@@ -70,7 +71,7 @@ class BookRouterDelegate extends RouterDelegate<BookRoutePath> with ChangeNotifi
 
   @override
   Widget build(BuildContext context) {
-    print("BookRouterDelegate.build with ${_selectedBook}");
+    print("BookRouterDelegate.build with $_selectedBook");
     // TODO convert state to pages
     final pages = [
       BooksListPage(books: books),
